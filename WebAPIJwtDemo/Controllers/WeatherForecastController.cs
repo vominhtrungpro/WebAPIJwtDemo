@@ -3,27 +3,34 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPIJwtDemo.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private readonly JwtAuthenticationManager _jwtAuthenticationManager;
+        private static readonly string[] Summaries = new[]
+        {
+        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+    };
 
-        public WeatherForecastController(JwtAuthenticationManager jwtAuthenticationManager)
+        private readonly ILogger<WeatherForecastController> _logger;
+
+        public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
-            _jwtAuthenticationManager = jwtAuthenticationManager;
+            _logger = logger;
         }
-        [AllowAnonymous]
-        [HttpPost("Authorize")]
-        public IActionResult AddUser([FromBody] User user)
+
+        [HttpGet(Name = "GetWeatherForecast")]
+        [Authorize]
+        public IEnumerable<WeatherForecast> Get()
         {
-            var token = _jwtAuthenticationManager.Authenticate(user.username, user.password);
-            if (token == null)
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
-                return Unauthorized();
-            }
-            return Ok();
+                Date = DateTime.Now.AddDays(index),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+            .ToArray();
         }
     }
-    
 }
