@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace WebAPIJwtDemo.Controllers
+namespace JWTRefreshToken.NET6._0.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -239,5 +239,6 @@ namespace WebAPIJwtDemo.Controllers
             return principal;
 
         }
+        
     }
 }

@@ -1,4 +1,4 @@
-namespace WebAPIJwtDemo
+namespace WebAPIJwtDemo.Auth
 {
     public class WeatherForecast
     {

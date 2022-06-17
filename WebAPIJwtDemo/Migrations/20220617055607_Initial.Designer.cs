@@ -12,8 +12,8 @@ using WebAPIJwtDemo.Auth;
 namespace WebAPIJwtDemo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220617035641_init")]
-    partial class init
+    [Migration("20220617055607_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
