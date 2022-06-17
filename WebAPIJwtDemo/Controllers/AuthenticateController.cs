@@ -239,6 +239,19 @@ namespace JWTRefreshToken.NET6._0.Controllers
             return principal;
 
         }
+        [AllowAnonymous]
+        [HttpPost("Authorize")]
+        public IActionResult AuthUser([FromBody] User user)
+        {
+            var token = GenerateRefreshToken();
+            if (token == null)
+            {
+                return Unauthorized();
+            }
+            return Ok(token);
+
+        }
+        
         
     }
 }
