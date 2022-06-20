@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using WebAPIJwtDemo.Auth;
+using System.Security.Claims;
 
 namespace WebAPIJwtDemo.Controllers
 {
@@ -14,6 +15,7 @@ namespace WebAPIJwtDemo.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scroching"
         };
         private readonly ILogger<WeatherForecastController> _logger;
+
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
@@ -30,6 +32,7 @@ namespace WebAPIJwtDemo.Controllers
             })
                 .ToArray();
         }
+        
     }
 
 }

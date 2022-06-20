@@ -74,7 +74,9 @@ namespace JWTRefreshToken.NET6._0.Controllers
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+            }
 
             ApplicationUser user = new()
             {
@@ -82,10 +84,13 @@ namespace JWTRefreshToken.NET6._0.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-
+            }
+            
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
@@ -95,31 +100,43 @@ namespace JWTRefreshToken.NET6._0.Controllers
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
-
+            }
+                
             ApplicationUser user = new()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+            }
 
             if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));  
+            }
+
             if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            {
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));      
+            }
 
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
+
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.User);
             }
+
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
@@ -141,11 +158,7 @@ namespace JWTRefreshToken.NET6._0.Controllers
                 return BadRequest("Invalid access token or refresh token");
             }
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
             string username = principal.Identity.Name;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
             var user = await _userManager.FindByNameAsync(username);
 
@@ -173,7 +186,10 @@ namespace JWTRefreshToken.NET6._0.Controllers
         public async Task<IActionResult> Revoke(string username)
         {
             var user = await _userManager.FindByNameAsync(username);
-            if (user == null) return BadRequest("Invalid user name");
+            if (user == null)
+            {
+                return BadRequest("Invalid user name");
+            } 
 
             user.RefreshToken = null;
             await _userManager.UpdateAsync(user);
@@ -211,7 +227,6 @@ namespace JWTRefreshToken.NET6._0.Controllers
 
             return token;
         }
-
         private static string GenerateRefreshToken()
         {
             var randomNumber = new byte[64];
@@ -234,24 +249,20 @@ namespace JWTRefreshToken.NET6._0.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
             if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
                 throw new SecurityTokenException("Invalid token");
-
+            }
+                
             return principal;
 
         }
-        [AllowAnonymous]
-        [HttpPost("Authorize")]
-        public IActionResult AuthUser([FromBody] User user)
+        [HttpGet, Authorize]
+        public ActionResult<string> GetMe()
         {
-            var token = GenerateRefreshToken();
-            if (token == null)
-            {
-                return Unauthorized();
-            }
-            return Ok(token);
-
+            var username = User?.Identity?.Name;
+            var username2 = User.FindFirstValue(ClaimTypes.Name);
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            return Ok(new { username, username2, role });
         }
-        
-        
     }
 }
